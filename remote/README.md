@@ -1,7 +1,7 @@
 # VCU Control Using CAN BUS with Joystick
 
 ## Start
-./home/pi/jiin/joystick
+`./home/pi/jiin/joystick`
 
 ## Button Mapping
 - X : enabling remote control
