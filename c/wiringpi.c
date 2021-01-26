@@ -14,7 +14,6 @@ int main ()
     int LEN = 300;
     char key[LEN];
     char *start_pt;
-    int comma[5];
 
     // Setup serial port on ODROID
     if ((gfd = serialOpen ("/dev/ttyACM0",9600)) < 0) {
@@ -29,15 +28,13 @@ int main ()
     //serialPrintf(gfd,"\r"); // send enter key to read data from sensor
     delay(1000);
 
-    
-
-    while (1)//(serialDataAvail (gfd)) 
+    while (1)
     {
 
         start = 0;
         for(i=0;i<LEN;i++)
         {
-            key[i] = serialGetchar(gfd);
+            key[i] = serialGetchar(gfd); //(serialDataAvail (gfd)) 
 
             if((i<LEN-68)&&(i>5)&&(key[i-5]=='$')&&(key[i-1]=='G')&&(key[i]=='A'))
             {
