@@ -84,12 +84,12 @@ static int can_echo(void)
 		}
 		
 		if(frame.can_id == 0x111){  \
-			printf("\nCurrent SoC : %d %c \n",frame.data[0], '%');			
+			printf("Current SoC : %d %c\n",frame.data[0], '%');			
 		}
 		
 		if(frame.can_id == 0x210){  
-			printf("\nMotor Speed : %d \n",frame.data[1]);
-			printf("\nWheel Angle : %d \n",frame.data[2]);	
+			printf("Motor Speed : %d\n",frame.data[1]);
+			printf("Wheel Angle : %d\n",frame.data[2]);	
 			//printf("\nSoC : %d %\n",frame.data[3]);	
 			
      		//	if (frame.data[0] & 0x04 == 0x04){
@@ -126,23 +126,12 @@ static int can_echo(void)
             // for loop took too much time and caused segmentation fault
 			
 			//latitude (ddmm.mmmmm)
-			printf("latitude: ");
-			for (i=17; i<27; i++){
-                printf("%c", key[start+i]);
-            }    
-
-            //printf("%c %c %c %c %c",key[start+17],key[start+18],key[start+19],key[start+20], key[start+21]);
-            //printf("%c %c %c %c %c \n",key[start+22], key[start+23],key[start+24],key[start+25],key[start+26]);
+            printf("\n%c%c%c%c%c",key[start+17],key[start+18],key[start+19],key[start+20], key[start+21]);
+            printf("%c%c%c%c%c\n",key[start+22], key[start+23],key[start+24],key[start+25],key[start+26]);
 
             //longitude
-			printf("\nlongitude: ");
-			for (i=30; i<41; i++){
-                printf("%c", key[start+i]);
-            }
-        	//printf("%c %c %c %c %c",key[start+30],key[start+31],key[start+32],key[start+33], key[start+34]);
-            //printf("%c %c %c %c %c %c \n",key[start+35], key[start+36],key[start+37],key[start+38],key[start+39],key[start+40]);
-
-
+        	printf("%c%c%c%c%c",key[start+30],key[start+31],key[start+32],key[start+33], key[start+34]);
+            printf("%c%c%c%c%c%c \n",key[start+35], key[start+36],key[start+37],key[start+38],key[start+39],key[start+40]);
 
 			fprintf(logfp, "%c%c%c%c%c", key[start+17],key[start+18],key[start+19],key[start+20], key[start+21]);
 			fprintf(logfp, "%c%c%c%c%c ", key[start+22], key[start+23],key[start+24],key[start+25],key[start+26]);
@@ -151,19 +140,6 @@ static int can_echo(void)
 			fprintf(logfp, "%c%c%c%c%c%c\n", key[start+35], key[start+36],key[start+37],key[start+38],key[start+39],key[start+40]);	
 
 			// save location
-			for (i=0; i<10; i++){
-				for(j=17; j<27; j++){
-					latitude[i] = key[start+j];
-				}
-			}
-
-			for (i=0; i<11; i++){
-				for(j=30; j<41; j++){
-					longitude[i] = key[start+j];
-				}
-			}			
-
-			/*
 			latitude[0] = key[start+17];
 			latitude[1] = key[start+18];
 			latitude[2] = key[start+19];
@@ -174,10 +150,7 @@ static int can_echo(void)
 			latitude[7] = key[start+24];
 			latitude[8] = key[start+25];
 			latitude[9] = key[start+26];
-			*/
 
-			// save longitude
-			/*
 			longitude[0] = key[start+30];
 			longitude[1] = key[start+31];
 			longitude[2] = key[start+32];
@@ -189,7 +162,6 @@ static int can_echo(void)
 			longitude[8] = key[start+38];
 			longitude[9] = key[start+39];
 			longitude[10] = key[start+40];
-			*/
 
 
 
