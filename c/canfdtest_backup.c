@@ -1,5 +1,4 @@
 ///home/pi/jiin/canfdtest/canfdtest.c
-// Updated on Jan 29th
 
 #include <stdio.h>
 #include <stdlib.h>
