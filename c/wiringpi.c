@@ -1,4 +1,5 @@
 //gcc -o wpi wiringpi.c -lwiringPi
+// Updated on Jan 29th
 
 #include <stdio.h>
 #include <string.h>
@@ -8,9 +9,9 @@
 
 int main ()
 {
+    static int LEN = 300; //#define LEN 300 cause segmentation fault
     char c, buf[100];
     int gfd, i, start;    
-    int LEN = 300; //#define LEN 300 cause segmentation fault
     char key[LEN];
     char *start_pt;
 
@@ -55,7 +56,6 @@ int main ()
                 printf("%c", key[start+i]);
             }
         }
-        
         delay(300);        
     }
 
