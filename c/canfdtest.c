@@ -1,8 +1,6 @@
 ///home/pi/jiin/canfdtest/canfdtest.c
 // Updated on Jan 29th
 
-///home/pi/jiin/canfdtest/canfdtest.c
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -25,7 +23,7 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
-// serial communication
+// serial communication (CAN bus)
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
