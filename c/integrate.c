@@ -1,4 +1,5 @@
 ///home/pi/jiin/canfdtest/canfdtest.c
+// Updated on Jan 29th
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,29 +27,22 @@
 #include <wiringPi.h>
 #include <wiringSerial.h>
 
-//#define CAN_MSG_ID	0x77
-#define CAN_MSG_LEN	8
-#define CAN_MSG_COUNT	50
-#define CAN_MSG_WAIT	3
-#define BUTPIN 7
-
-#define LEN 300
-
+//#define LEN 300 //segmentation fault
 
 FILE *fp;
 FILE *logfp; 
 static int running = 1;
 static int verbose=1;
 static int sockfd;
+//static int LEN = 300;   //variably modified ‘key’ at file scope
 
 time_t timer;
-char buffer[26];
 struct tm* tm_info;
+char buffer[26]; //CAN Bus buffer
 
+// gps variables
 char c, buf[100];
 int gfd, i, start; 
-//static int LEN = 300;   //variably modified ‘key’ at file scope
-char key[LEN];
 char *start_pt;
 
 static void signal_handler(int signo)
@@ -72,9 +66,13 @@ static int recv_frame(struct can_frame *frame)
 	return 0;
 }
 
-static int can_echo_dut(void)
+static int can_echo(void)
 {
 	struct can_frame frame;
+	
+	// gps buffer variables
+	static int LEN = 300;   
+	char key[LEN];
 
 	while (running) {
 		if (recv_frame(&frame)) {
@@ -82,7 +80,7 @@ static int can_echo_dut(void)
 		}
 		
 		if(frame.can_id == 0x111){  \
-			printf("\nCurrent SoC : %d % \n",frame.data[0]);			
+			printf("\nCurrent SoC : %d %c \n",frame.data[0], '%');			
 		}
 		
 		if(frame.can_id == 0x210){  
@@ -97,22 +95,21 @@ static int can_echo_dut(void)
 			}
 			*/
 		}
-       
+
+		// timestamp
 		timer = time(NULL);
 		tm_info = localtime(&timer);
 		strftime(buffer, 26, "%Y-%m-%d, %H:%M:%S", tm_info);	
-        // log car status data into canlog.txt
-		fprintf(logfp, "%s %d %d \n", buffer , frame.data[1], frame.data[2]);
         
-	}
-	return 0;
-}
+		// log car status data into canlog.txt
+		fprintf(logfp, "%s %d %d \n", buffer , frame.data[1], frame.data[2]);
 
-void gpslog (void){
-    while(1){
-        start = 0;
+		//---------------------------------------gps---------------------------------------
+		start = 0;
         for(i = 0; i < LEN; i++){
             key[i] = serialGetchar(gfd);
+			
+			// filter gps data that starts with $GNGGA
             if((i<LEN-68) && (i>5) && (key[i-5]=='$') && (key[i-1]=='G') && (key[i]=='A')){
                 start = i-5;
                 *start_pt = key[start];
@@ -120,34 +117,35 @@ void gpslog (void){
         }
 
         if(start!=0){
-            //latitude (ddmm.mmmmm)
-            // from key[start+17] to key[start+26]
+            // latitude (ddmm.mmmmm): from key[start+17] to key[start+26]
             printf("\n latitude: ");
             for (i=17; i<27; i++){
                 printf("%c", key[start+i]);
             }         
             
-            //longitude (ddmm.mmmmm)
-            // from key[start+30] to key[start+40]
+            // longitude (ddmm.mmmmm): from key[start+30] to key[start+40]
             printf("\n longitude: ");
             for (i=30; i<41; i++){
                 printf("%c", key[start+i]);
             }
-        }      
+        }          
+        //delay(300);  
         
-        delay(300);  
-    }
+	}
+	return 0;
 }
+
+
 
 int main()
 {
 	// can variable
-    //int state;
 	struct ifreq ifr;
 	struct sockaddr_can addr;
 	char *intf_name;
 	int family = PF_CAN, type = SOCK_RAW, proto = CAN_RAW;
     int err;
+    //int state;
 
 	logfp = fopen("/home/pi/jiin/canfdtest/canlog.txt", "w");
 	if (logfp == NULL){
@@ -167,7 +165,7 @@ int main()
 	intf_name = "can0";
 
     //---------------------------gps setup start-----------------------//
-    // Setup serial port on ODROID
+    // Setup serial port on ODROID, baudrate = 9600
     if ((gfd = serialOpen ("/dev/ttyACM0",9600)) < 0) {
         fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
         return 1 ;
@@ -179,7 +177,6 @@ int main()
 
     delay(1000);
     //---------------------------gps setup end-----------------------//
-
 
 	printf("interface = %s, family = %d, type = %d, proto = %d\n",
 	       intf_name, family, type, proto);
@@ -200,13 +197,13 @@ int main()
 		return 1;
 	}
 
-	err = can_echo_dut();
+	err = can_echo();
 
 	if (verbose)
 		printf("Exiting...\n");
 
-	close(sockfd);
-    serialClose(gfd);    
+	close(sockfd); //can
+    serialClose(gfd); //gps   
 
 	return err;
 
