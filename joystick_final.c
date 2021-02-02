@@ -1,10 +1,5 @@
-/**
- * Reference Author: Jason White
- *
- * Editor: Jiin Sang. Duc 
- *
- * https://www.kernel.org/doc/Documentation/input/joystick-api.txt
- */
+//https://www.kernel.org/doc/Documentation/input/joystick-api.txt
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -12,28 +7,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXCHAR 10 //canlog
 
 int state; // can state
 FILE *fp;
-
-// canlog variable
-FILE *canfp;
-FILE *canlogfp;
-//char canbyte;
-char str[MAXCHAR];
-char* filename = "/home/pi/jiin/canlog.txt";
-
-
 char des_angle_str[3]={'0', '0'};
 char VCUcommand[33]={'c','a','n','s','e','n','d',' ','c','a','n','0',' ','2','0','0','#','8','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};//33
  /*                   0                   5                   10                  15      17  18  19  20  21                                          32         */
 unsigned int des_angle = 90;
-/**
- * Reads a joystick event from the joystick device.
- *
- * Returns 0 on success. Otherwise -1 is returned.
- */
+
+// Returns 0 on success. Otherwise -1 is returned.
+
 int read_event(int fd, struct js_event *event)
 {
     ssize_t bytes;
@@ -43,13 +26,11 @@ int read_event(int fd, struct js_event *event)
     if (bytes == sizeof(*event))
         return 0;
 
-    /* Error, could not read full event. */
+    //error
     return -1;
 }
 
-/**
- * Returns the number of axes on the controller or 0 if an error occurs.
- */
+// Returns the number of axes on the controller or 0 if an error occurs.
 size_t get_axis_count(int fd)
 {
     __u8 axes;
@@ -60,9 +41,6 @@ size_t get_axis_count(int fd)
     return axes;
 }
 
-/**
- * Returns the number of buttons on the controller or 0 if an error occurs.
- */
 size_t get_button_count(int fd)
 {
     __u8 buttons;
@@ -72,22 +50,12 @@ size_t get_button_count(int fd)
     return buttons;
 }
 
-/**
- * Current state of an axis.
- */
+// joystick handle
 struct axis_state {
     short x, y;
 };
 
-/**
- * Keeps track of the current axis state.
- *
- * NOTE: This function assumes that axes are numbered starting from 0, and that
- * the X axis is an even number, and the Y axis is an odd number. However, this
- * is usually a safe assumption.
- *
- * Returns the axis that the event indicated.
- */
+
 size_t get_axis_state(struct js_event *event, struct axis_state axes[3])
 {
     size_t axis = event->number / 2;
@@ -130,57 +98,12 @@ int main(int argc, char *argv[])
 	}
 	state = pclose(fp);
     //---------can initial setup end-----------------//
-
-    // candump -tA can0,00200200:1fffffff,210:7ff
-    // popen() returns a pointer to an open stream that can be used to read or write to the pipe
-    //canfp = popen("candump can0,00200200:1fffffff,210:7ff >> canlog.txt", "r"); 
-    canfp = popen("candump can0 >> canlog.txt", "r"); 
     
-    if(canfp==NULL){
-		perror("error logging the can data : ");
-		exit(0);
-	}
-
-    canlogfp = fopen(filename, "r");
-    if (canlogfp == NULL){
-        printf("Could not open file %s",filename);
-        return 1;
-    }
-    
-    
-    
-
-
-
-
-    // -------------------------remote control-------------------------//
     /* This loop will exit if the controller is unplugged. */
-    while (1)
+    while (read_event(js, &event) == 0)
     {
-        // can log
-        /*
-        while (canbyte = fgetc(canlogfp) != EOF) {
-            printf("%c", canbyte);
-        }*/
-        /*
-        canbyte = fgetc(canlogfp);
-        while (canbyte = fgetc(canlogfp) != EOF) {
-            printf("%c", canbyte);
-        }
-        */
-
-        fseek(canlogfp, 0L, SEEK_END);
-        int count = ftell(canlogfp);
-
-        while (fgets(str, MAXCHAR, canlogfp) != NULL) {
-            //printf("%s", str);
-            printf(count);
-        }
-        
-        //joystick event 
-        while (read_event(js, &event) == 0) {            
-            switch (event.type)
-            {
+        switch (event.type)
+        {
             case JS_EVENT_BUTTON:
                 printf("Button %u %s\n", event.number, event.value ? "pressed" : "released");
                 
@@ -349,9 +272,8 @@ int main(int argc, char *argv[])
                 /* Ignore init events. */
                 break;
         }
-            fflush(stdout);
-        }
         
+        fflush(stdout);
     }
 
     close(js);
